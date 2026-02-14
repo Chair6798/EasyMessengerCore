@@ -40,6 +40,13 @@ def create_session(account_id):
     return sesid
 
 
+def find_account_by_session(session_id: str) -> int:
+    try:
+        return sessions.get(session_id, -1)
+    except Exception:
+        return -1
+
+
 def create_chat(name, root):
     chat = {"name": name, "root": root, "closed":False, "messages": [], "people":[]}
     chats.append(chat)
@@ -73,7 +80,7 @@ def login(username,password):
         print("Failed to login to "+username+" Password wrong!")
         return enc.encode({"done":False, "reasoncode":2})
 
-@app.route("/chats/<session>/<chatid>/<message>/")
+@app.route("/chats/send/<session>/<chatid>/<message>/")
 def getmessages(session,chatid,message):
     chatid=-1
     try:
@@ -85,3 +92,4 @@ def getmessages(session,chatid,message):
     chat=chats[chatid]
     if not (chatid in chat["people"]):
         return enc.encode({"done":False,"reasoncode":3})
+    chat.messages.append({"text":str(message),"userid":find_account_by_session(session)})
