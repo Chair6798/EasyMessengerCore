@@ -72,3 +72,11 @@ def login(username,password):
     else:
         print("Failed to login to "+username+" Password wrong!")
         return enc.encode({"done":False, "reasoncode":2})
+
+@app.route("/chats/<session>/<chatid>/<message>/")
+def getmessages(session,chatid,message):
+    chatid=-1
+    try:
+        chatid=int(chatid)
+    except Exception as e:
+        return enc.encode({"done":False,"reasoncode":1})
