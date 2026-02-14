@@ -41,7 +41,7 @@ def create_session(account_id):
 
 
 def create_chat(name, root):
-    chat = {"name": name, "root": root, "closed":False, "messages": []}
+    chat = {"name": name, "root": root, "closed":False, "messages": [], "people":[]}
     chats.append(chat)
     return chat
 
@@ -78,5 +78,10 @@ def getmessages(session,chatid,message):
     chatid=-1
     try:
         chatid=int(chatid)
+        if chatid<0 or chatid>len(chats)-1:
+            return enc.encode({"done":False,"reasoncode":2})
     except Exception as e:
         return enc.encode({"done":False,"reasoncode":1})
+    chat=chats[chatid]
+    if not (chatid in chat["people"]):
+        return enc.encode({"done":False,"reasoncode":3})
