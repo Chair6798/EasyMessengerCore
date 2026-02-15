@@ -81,7 +81,7 @@ def login(username,password):
         return enc.encode({"done":False, "reasoncode":2})
 
 @app.route("/chats/send/<session>/<chatid>/<message>/")
-def getmessages(session,chatid,message):
+def sendmessages(session,chatid,message: str):
     chatid=-1
     try:
         chatid=int(chatid)
@@ -90,6 +90,35 @@ def getmessages(session,chatid,message):
     except Exception as e:
         return enc.encode({"done":False,"reasoncode":1})
     chat=chats[chatid]
-    if not (chatid in chat["people"]):
+    if not (find_account_by_session(session) in chat["people"]):
         return enc.encode({"done":False,"reasoncode":3})
+    if "'" in message or '"' in message:
+        return enc.encode({"done":False,"reasoncode":4})
     chat.messages.append({"text":str(message),"userid":find_account_by_session(session)})
+    print("sended message")
+    return enc.encode({"done":False,"reasoncode":0})
+
+@app.route("/chats/get/<session>/<chatid>/")
+def getchat(session,chatid):
+    chatid=-1
+    try:
+        chatid=int(chatid)
+        if chatid<0 or chatid>len(chats)-1:
+            return enc.encode({"done":False,"reasoncode":2})
+    except Exception as e:
+        return enc.encode({"done":False,"reasoncode":1})
+    chat=chats[chatid]
+    if not (find_account_by_session(session) in chat["people"]):
+        return enc.encode({"done":False,"reasoncode":3})
+    return enc.encode({"done":True,"reasoncode":0,"value":chat})
+
+@app.route("/chats/getchats/<session>/")
+def getchats(session):
+    userid = find_account_by_session(session)
+    if userid == -1:
+        return enc.encode({"done":False,"reasoncode":1})
+    chatslist = []
+    for v in chats:
+        if userid in v["people"]:
+            chatslist.append({"chat":v,"id":chats.index(v)})
+    return enc.encode({"done":True,"reasoncode":0,"value":chatslist})
